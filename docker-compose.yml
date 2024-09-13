@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  streamlit:
+    image: chatapp:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8501:8501"
+    command: bash -c 'streamlit run app.py --server.address 0.0.0.0'
+
