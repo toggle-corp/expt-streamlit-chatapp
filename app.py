@@ -40,16 +40,36 @@ class ChatAgent:
         else:
             st.write(f"Some errors occured while sending the request. http code: {response.status_code}")
 
+    def display_messages(self):
+        """
+        Display messages in the chat interface.
+        If no messages are present, adds a default AI message.
+        """
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = []
+            st.session_state.chat_history.append({"ai": "I am a chabot with knowledge base. How can I help you?"})
+
+        for item in st.session_state.chat_history:
+            if "human" in item:
+                with st.chat_message("human"):
+                    st.markdown(item["human"])
+            else:
+                with st.chat_message("ai"):
+                    st.markdown(item["ai"])
+
     def start_conversation(self):
         """
         Start a conversation in the chat interface.
         """
+        self.display_messages()
         user_query = st.chat_input(placeholder="Ask me anything!")
         if user_query:
             st.chat_message("human").write(user_query)
+            st.session_state.chat_history.append({"human": user_query})
             response = self.send_request(query=user_query)
 
             st.chat_message("ai").write(response)
+            st.session_state.chat_history.append({"ai": response})
 
 
 def main():
