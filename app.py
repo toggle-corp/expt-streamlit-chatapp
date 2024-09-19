@@ -1,5 +1,6 @@
 import os
-from dataclasses import dataclass
+import uuid
+from dataclasses import dataclass, field
 
 import requests
 import streamlit as st
@@ -18,18 +19,20 @@ class ChatAgent:
     """
 
     path: str = "chat_message"
+    user_id: str = field(init=False)
 
     def __post_init__(self):
         """
         Initialize the ChatAgent.
         """
         self.url = f"http://{SERVER_IP}:{SERVER_PORT}/{self.path}"
+        self.user_id = str(uuid.uuid4())
 
     def send_request(self, query: str, timeout: int = 30):
         """
         Sends the post request to the server
         """
-        payload = {"query": query}
+        payload = {"query": query, "user_id": self.user_id}
         try:
             response = requests.post(url=self.url, json=payload, timeout=timeout)
         except requests.Timeout as e:
