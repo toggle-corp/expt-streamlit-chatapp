@@ -27,6 +27,8 @@ class ChatAgent:
         """
         self.url = f"http://{SERVER_IP}:{SERVER_PORT}/{self.path}"
         self.user_id = str(uuid.uuid4())
+        self.ai_avatar = "https://togglecorp.com/favicon.png"
+
 
     def send_request(self, query: str, timeout: int = 30):
         """
@@ -57,7 +59,7 @@ class ChatAgent:
                 with st.chat_message("human"):
                     st.markdown(item["human"])
             else:
-                with st.chat_message("ai"):
+                with st.chat_message("ai", avatar=self.ai_avatar):
                     st.markdown(item["ai"])
 
     def start_conversation(self):
@@ -71,7 +73,7 @@ class ChatAgent:
             st.session_state.chat_history.append({"human": user_query})
             response = self.send_request(query=user_query)
 
-            st.chat_message("ai").write(response)
+            st.chat_message("ai",avatar=self.ai_avatar).write(response)
             st.session_state.chat_history.append({"ai": response})
 
 
