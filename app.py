@@ -1,6 +1,6 @@
 import os
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import requests
 import streamlit as st
@@ -19,27 +19,28 @@ class ChatAgent:
     """
 
     path: str = "chat_message"
-    user_id: str = field(init=False)
 
     def __post_init__(self):
         """
         Initialize the ChatAgent.
         """
         self.url = f"http://{SERVER_IP}:{SERVER_PORT}/{self.path}"
-        self.user_id = str(uuid.uuid4())
         self.ai_avatar = "https://togglecorp.com/favicon.png"
-
+        if "user_id" not in st.session_state:
+            st.session_state["user_id"] = str(uuid.uuid4())
 
     def send_request(self, query: str, timeout: int = 30):
         """
         Sends the post request to the server
         """
-        payload = {"query": query, "user_id": self.user_id}
+        payload = {"query": query, "user_id": st.session_state["user_id"]}
         try:
             response = requests.post(url=self.url, json=payload, timeout=timeout)
-        except requests.Timeout as e:
-            st.write("Timeout occured. Server is not responding.")
-            raise Exception(e)
+        except requests.Timeout:
+            e = TimeoutError("Server is not responding")
+            st.exception(e)
+            return
+
         if response.status_code == 200:
             return response.json()
         else:
@@ -72,9 +73,9 @@ class ChatAgent:
             st.chat_message("human").write(user_query)
             st.session_state.chat_history.append({"human": user_query})
             response = self.send_request(query=user_query)
-
-            st.chat_message("ai",avatar=self.ai_avatar).write(response)
-            st.session_state.chat_history.append({"ai": response})
+            if response:
+                st.chat_message("ai", avatar=self.ai_avatar).write(response)
+                st.session_state.chat_history.append({"ai": response})
 
 
 def main():
