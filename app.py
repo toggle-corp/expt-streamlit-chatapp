@@ -19,22 +19,25 @@ class ChatAgent:
     """
 
     path: str = "chat_message"
-    user_id: str = field(init=False)
+
 
     def __post_init__(self):
         """
         Initialize the ChatAgent.
         """
         self.url = f"http://{SERVER_IP}:{SERVER_PORT}/{self.path}"
-        self.user_id = str(uuid.uuid4())
         self.ai_avatar = "https://togglecorp.com/favicon.png"
+        if "user_id" not in st.session_state:
+            st.session_state["user_id"] = str(uuid.uuid4())
+
 
 
     def send_request(self, query: str, timeout: int = 30):
         """
         Sends the post request to the server
         """
-        payload = {"query": query, "user_id": self.user_id}
+        print("user=->", st.session_state["user_id"])
+        payload = {"query": query, "user_id": st.session_state["user_id"]}
         try:
             response = requests.post(url=self.url, json=payload, timeout=timeout)
         except requests.Timeout as e:
