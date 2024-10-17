@@ -1,5 +1,7 @@
 import os
 import uuid
+import time
+
 from dataclasses import dataclass
 
 import requests
@@ -29,10 +31,16 @@ class ChatAgent:
         if "user_id" not in st.session_state:
             st.session_state["user_id"] = str(uuid.uuid4())
 
+    def stream_data(self, result):
+        for word in result.split(" "):
+            yield word + " "
+            time.sleep(0.10)
+
     def send_request(self, query: str, timeout: int = 30):
         """
         Sends the post request to the server
         """
+
         payload = {"query": query, "user_id": st.session_state["user_id"]}
         try:
             response = requests.post(url=self.url, json=payload, timeout=timeout)
@@ -74,7 +82,7 @@ class ChatAgent:
             st.session_state.chat_history.append({"human": user_query})
             response = self.send_request(query=user_query)
             if response:
-                st.chat_message("ai", avatar=self.ai_avatar).write(response)
+                st.chat_message("ai", avatar=self.ai_avatar).write_stream(self.stream_data(response))
                 st.session_state.chat_history.append({"ai": response})
 
 
