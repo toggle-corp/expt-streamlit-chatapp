@@ -1,7 +1,6 @@
 import os
-import uuid
 import time
-
+import uuid
 from dataclasses import dataclass
 
 import requests
@@ -41,7 +40,7 @@ class ChatAgent:
         Sends the post request to the server
         """
 
-        payload = {"query": query, "user_id": st.session_state["user_id"]}
+        payload = {"query": query, "platform": 2, "user_id": st.session_state["user_id"]}
         try:
             response = requests.post(url=self.url, json=payload, timeout=timeout)
         except requests.Timeout:
