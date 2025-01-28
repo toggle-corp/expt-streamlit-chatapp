@@ -1,12 +1,14 @@
 import os
-import uuid
 import time
-
+import uuid
 from dataclasses import dataclass
 
 import requests
 import streamlit as st
 from dotenv import load_dotenv
+from streamlit_local_storage import LocalStorage
+
+from disclaimer import show_disclaimer
 
 load_dotenv()
 
@@ -77,7 +79,10 @@ class ChatAgent:
         """
         self.display_messages()
         user_query = st.chat_input(placeholder="Ask me anything!")
-        if user_query:
+        if user_query and len(user_query.split()) > 50:
+            st.warning("No more than 50 words are allowed in a single query ")
+
+        elif user_query:
             st.chat_message("human").write(user_query)
             st.session_state.chat_history.append({"human": user_query})
             response = self.send_request(query=user_query)
@@ -91,9 +96,19 @@ def main():
     main handler
     """
     st.set_page_config(page_title="AI Chatbot For Test")
+    local_storage = LocalStorage()
 
-    chat_agent = ChatAgent()
-    chat_agent.start_conversation()
+    consent_status = local_storage.getItem("chatbot_consent_confirm")
+
+    if consent_status != "true":
+        show_disclaimer(local_storage=local_storage)
+
+    else:
+        chat_agent = ChatAgent()
+        chat_agent.start_conversation()
+
+    if consent_status == "true" and st.session_state.get("chatbot_consent_confirm") != "true":
+        local_storage.setItem("chatbot_consent_confirm", "true")
 
 
 if __name__ == "__main__":
