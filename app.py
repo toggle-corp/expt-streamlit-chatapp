@@ -79,8 +79,9 @@ class ChatAgent:
         """
         self.display_messages()
         user_query = st.chat_input(placeholder="Ask me anything!")
-        if user_query and len(user_query.split()) > 50:
-            st.warning("No more than 50 words are allowed in a single query ")
+        if user_query and len(user_query) > 400:
+            st.chat_message("human").write(user_query)
+            st.warning("Oops! Your query is too long. Please keep it under 400 characters.")
 
         elif user_query:
             st.chat_message("human").write(user_query)
